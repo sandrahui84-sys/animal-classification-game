@@ -69,10 +69,10 @@ const animals=[
 ];
 const labels={bird:"鳥類 🐦",insect:"昆蟲 🦋",fish:"魚類 🐟",mammal:"哺乳動物 🐼"};
 const features={
- bird:["身體有羽毛","有喙","前肢演化成翅膀"],
- insect:["有六隻腳","身體分為頭、胸、腹三部分","有一對觸角"],
- fish:["用鰓呼吸","有鰭幫助游泳","大多生活在水中"],
- mammal:["雌性會分泌乳汁餵哺幼兒","用肺呼吸","多數身體有毛"]
+ bird:["全身長有羽毛","有一對翅膀和一對腳","用嘴取食","用肺呼吸","有脊柱，是脊椎動物"],
+ insect:["身體分為頭、胸、腹三部分","有三對腳","部分有一對或兩對翅膀","頭上有一對觸角","沒有脊柱，是無脊椎動物"],
+ fish:["皮膚濕潤，通常長有鱗片，用以保護身體","用鰭游動和保持平衡","用鰓呼吸","大多生活在水中","有脊柱，是脊椎動物"],
+ mammal:["用母乳來餵養幼兒","用肺來呼吸","身體表面長有毛髮","有脊柱，是脊椎動物","幼體通常由親代照顧"]
 };
 const levelInfo={1:{title:"看圖分類",prompt:"觀察真實動物圖片，找出牠所屬的分類。"},2:{title:"特徵偵探",prompt:"從圖片線索中，選出最能代表這類動物的特徵。"},3:{title:"特徵反推",prompt:"根據身體特徵線索，推理出正確的動物分類。"}};
 let qs=[],i=0,raw=0,combo=0,answered=false,timer=null,left=0,cfg={},activeLevel=0;
@@ -82,7 +82,7 @@ function decorateHome(){document.querySelectorAll("[data-animal]").forEach(img=>
 function build(level){
  const n=Math.max(1,+document.getElementById("num").value||5),types=Object.keys(labels);qs=[];
  if(level===1){for(let x=0;x<n;x++){let a=pick(animals);qs.push({l:1,k:"img",a,ans:a.type})}}
- if(level===2){for(let x=0;x<n;x++){let a=pick(animals),ans=pick(features[a.type]),wrong=shuffle(types.filter(t=>t!==a.type).map(t=>pick(features[t]))).slice(0,3);qs.push({l:2,k:"feat",a,ans,opts:shuffle([ans,...wrong])})}}
+ if(level===2){for(let x=0;x<n;x++){let a=pick(animals),ans=pick(features[a.type]),wrong=[],used=new Set([ans]);shuffle(types.filter(t=>t!==a.type)).forEach(t=>{let f=shuffle(features[t]).find(v=>!used.has(v));if(f){wrong.push(f);used.add(f)}});if(wrong.length<3){let pool=types.reduce((all,t)=>all.concat(features[t]),[]);shuffle(pool).forEach(f=>{if(wrong.length<3&&!used.has(f)){wrong.push(f);used.add(f)}})}qs.push({l:2,k:"feat",a,ans,opts:shuffle([ans,...wrong.slice(0,3)])})}}
  if(level===3){for(let x=0;x<n;x++){let t=pick(types),clue=shuffle(features[t]).slice(0,2).join("；");qs.push({l:3,k:"clue",ans:t,clue})}}
 }
 function startLevel(level){let input=document.getElementById("player"),name=(input.value||"").trim(),prompt=document.getElementById("namePrompt");if(!name){prompt.classList.remove("hidden");input.focus();return}prompt.classList.add("hidden");start(level)}
